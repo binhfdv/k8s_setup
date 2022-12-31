@@ -44,7 +44,7 @@ sudo sleep 10
 echo "Configure on master..."
 sudo kubeadm config images pull
 sudo firewall-cmd --zone=public --permanent --add-port={6443,2379,2380,10250,10251,10252}/tcp
-sudo firewall-cmd --zone=public --permanent --add-rich-rule 'rule family=ipv4 source address=192.168.26.42/32 accept'
+# sudo firewall-cmd --zone=public --permanent --add-rich-rule 'rule family=ipv4 source address=192.168.26.42/32 accept'
 sudo firewall-cmd --reload
 sudo systemctl stop firewalld.service
 sudo kubeadm init --skip-phases=addon/kube-proxy
