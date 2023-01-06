@@ -43,7 +43,7 @@ sudo apt-get install firewalld -y
 sudo sleep 10
 echo "Configure on master..."
 sudo kubeadm config images pull
-sudo firewall-cmd --zone=public --permanent --add-port={6443,2379,2380,10250,10251,10252}/tcp
+# sudo firewall-cmd --zone=public --permanent --add-port={6443,2379,2380,10250,10251,10252}/tcp
 # sudo firewall-cmd --zone=public --permanent --add-rich-rule 'rule family=ipv4 source address=192.168.26.42/32 accept'
 sudo firewall-cmd --reload
 sudo systemctl stop firewalld.service
@@ -54,12 +54,12 @@ sudo sleep 30
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
-sudo apt-get install bash-completion
-source /usr/share/bash-completion/bash_completion
-echo 'source <(kubectl completion bash)' >>~/.bashrc
-exec bash
-echo "Testing Kubernetes namespaces... "
-kubectl get pods --all-namespaces
-echo "Testing Kubernetes nodes... "
-kubectl get nodes
-echo "All ok"
+# sudo apt-get install bash-completion
+# source /usr/share/bash-completion/bash_completion
+# echo 'source <(kubectl completion bash)' >>~/.bashrc
+# exec bash
+# echo "Testing Kubernetes namespaces... "
+# kubectl get pods --all-namespaces
+# echo "Testing Kubernetes nodes... "
+# kubectl get nodes
+# echo "All ok"
