@@ -42,7 +42,7 @@ echo "Installing firewalld..."
 sudo apt-get install firewalld -y
 sudo sleep 10
 echo "Configure on worker..."
-sudo firewall-cmd --zone=public --permanent --add-port={10250,30000-32767}/tcp
-sudo firewall-cmd --reload
+# sudo firewall-cmd --zone=public --permanent --add-port={10250,30000-32767}/tcp
+# sudo firewall-cmd --reload
 sudo systemctl stop firewalld.service
 echo "Kubernetes Installation finished..."
