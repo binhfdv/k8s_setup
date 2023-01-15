@@ -9,9 +9,9 @@ EOF
 sudo modprobe overlay
 sudo modprobe br_netfilter
 sudo tee /etc/sysctl.d/kubernetes.conf <<EOF
-net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 net.ipv4.ip_forward = 1
+net.bridge.bridge-nf-call-ip6tables = 1
 EOF
 sudo sysctl --system
 echo "Installing containerd..."
@@ -36,7 +36,7 @@ echo "Installing k8s..."
 sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main" -y
 sudo apt-get update
-sudo apt-get install -y kubelet=1.23.0-00 kubeadm=1.23.0-00 kubectl=1.23.0-00
+sudo apt-get install -y kubelet=1.22.1-00 kubeadm=1.22.1-00 kubectl=1.22.1-00
 sudo apt-mark hold kubelet kubeadm kubectl
 echo "Installing firewalld..."
 sudo apt-get install firewalld -y
