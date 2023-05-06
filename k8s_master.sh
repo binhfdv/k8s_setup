@@ -25,6 +25,8 @@ sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/c
 sudo systemctl restart containerd
 sudo systemctl enable containerd
 echo "Removing existing k8s..."
+sudo kubeadm reset
+sudo apt-mark unhold kubelet kubeadm kubectl
 sudo apt-get purge kubeadm kubernetes-cni -y
 sudo rm -rf /etc/kubernetes
 sudo rm -rf $HOME/.kube/config
@@ -36,15 +38,17 @@ echo "Installing k8s..."
 sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main" -y
 sudo apt-get update
-sudo apt-get install -y kubelet=1.22.1-00 kubeadm=1.22.1-00 kubectl=1.22.1-00
+sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 echo "Installing firewalld..."
 sudo apt-get install firewalld -y
+sudo systemctl start firewalld.service
 sudo sleep 10
 echo "Configure on master..."
+sudo kill -9 $(sudo lsof -t -i:10250)
 sudo kubeadm config images pull
-# sudo firewall-cmd --zone=public --permanent --add-port={6443,2379,2380,10250,10251,10252}/tcp
-# sudo firewall-cmd --zone=public --permanent --add-rich-rule 'rule family=ipv4 source address=192.168.26.42/32 accept'
+sudo firewall-cmd --zone=public --permanent --add-port={6443,2379,2380,10250,10251,10252}/tcp
+sudo firewall-cmd --zone=public --permanent --add-rich-rule 'rule family=ipv4 source address=192.168.4.105/32 accept'
 sudo firewall-cmd --reload
 sudo systemctl stop firewalld.service
 sudo kubeadm init --skip-phases=addon/kube-proxy
