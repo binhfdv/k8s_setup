@@ -27,7 +27,7 @@ sudo systemctl enable containerd
 echo "Removing existing k8s..."
 sudo kubeadm reset
 sudo apt-mark unhold kubelet kubeadm kubectl
-sudo apt-get purge kubeadm kubernetes-cni -y
+sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni -y
 sudo rm -rf /etc/kubernetes
 sudo rm -rf $HOME/.kube/config
 sudo rm -rf /var/lib/etcd
@@ -38,7 +38,7 @@ echo "Installing k8s..."
 sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main" -y
 sudo apt-get update
-sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-get install -y kubelet=1.21.10-00 kubeadm=1.21.10-00 kubectl=1.21.10-00
 sudo apt-mark hold kubelet kubeadm kubectl
 echo "Installing firewalld..."
 sudo apt-get install firewalld -y
