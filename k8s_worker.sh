@@ -9,9 +9,9 @@ EOF
 sudo modprobe overlay
 sudo modprobe br_netfilter
 sudo tee /etc/sysctl.d/kubernetes.conf <<EOF
-net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 net.ipv4.ip_forward = 1
+net.bridge.bridge-nf-call-ip6tables = 1
 EOF
 sudo sysctl --system
 echo "Installing containerd..."
@@ -25,7 +25,11 @@ sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/c
 sudo systemctl restart containerd
 sudo systemctl enable containerd
 echo "Removing existing k8s..."
+sudo swapoff -a 
 sudo kubeadm reset
+sudo rm -rf /var/lib/cni/
+sudo systemctl daemon-reload
+sudo iptables -F && sudo iptables -t nat -F && sudo iptables -t mangle -F && sudo iptables -X
 sudo apt-mark unhold kubelet kubeadm kubectl
 sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni -y
 sudo rm -rf /etc/kubernetes
@@ -38,13 +42,47 @@ echo "Installing k8s..."
 sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main" -y
 sudo apt-get update
-sudo apt-get install -y kubelet=1.21.10-00 kubeadm=1.21.10-00 kubectl=1.21.10-00
+sudo apt-get install -y kubelet=1.25.0-00 kubeadm=1.25.0-00 kubectl=1.25.0-00
 sudo apt-mark hold kubelet kubeadm kubectl
 echo "Installing firewalld..."
 sudo apt-get install firewalld -y
+sudo systemctl start firewalld.service
 sudo sleep 10
-echo "Configure on worker..."
-# sudo firewall-cmd --zone=public --permanent --add-port={10250,30000-32767}/tcp
-# sudo firewall-cmd --reload
+echo "Configure on master..."
+sudo kill -9 $(sudo lsof -t -i:10250)
+sudo kill -9 $(sudo lsof -t -i:6443)
+sudo kubeadm config images pull
+sudo firewall-cmd --zone=public --permanent --add-port={6443,2379,2380,10250,10251,10252}/tcp
+sudo firewall-cmd --zone=public --permanent --add-rich-rule 'rule family=ipv4 source address=192.168.4.105/24 accept'
+sudo firewall-cmd --reload
 sudo systemctl stop firewalld.service
-echo "Kubernetes Installation finished..."
+sudo rm -rf /var/run/docker-shim.sock and /var/run/docker.sock
+# sudo kubeadm init --skip-phases=addon/kube-proxy
+# echo "Kubernetes Installation finished..."
+# echo "Waiting 30 seconds for the cluster to go online..."
+# sudo sleep 30
+# mkdir -p $HOME/.kube
+# sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+# sudo chown $(id -u):$(id -g) $HOME/.kube/config
+# sudo apt-get install bash-completion
+# source /usr/share/bash-completion/bash_completion
+# echo 'source <(kubectl completion bash)' >>~/.bashrc
+# exec bash
+# echo "Testing Kubernetes namespaces... "
+# kubectl get pods --all-namespaces
+# echo "Testing Kubernetes nodes... "
+# kubectl get nodes
+# echo "All ok"
+
+
+# delete namespace
+# kubectl proxy
+# kubectl get ns operators -o json | \
+#   jq '.spec.finalizers=[]' | \
+#   curl -X PUT http://localhost:8001/api/v1/namespaces/operators/finalize -H "Content-Type: application/json" --data @-
+
+# kubectl label node node_name node-role.kubernetes.io/worker=worker
+
+# sudo kubeadm init --apiserver-advertise-address=192.168.4.102 --upload-certs --pod-network-cidr=192.168.4.0/16
+
+# sudo kill -9 $(sudo lsof -t -i:10250)
